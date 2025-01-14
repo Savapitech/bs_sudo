@@ -7,31 +7,17 @@
 
 MAKEFLAGS += -j
 
-NAME := libhashtable.a
-
-TEST_NAME := testeu
+NAME := bs_sudo
 
 SRC := $(wildcard src/*.c)
-
-LIB_SRC := $(wildcard lib/functions/int/*.c)
-LIB_SRC += $(wildcard lib/functions/print/*.c)
-LIB_SRC += $(wildcard lib/functions/str/*.c)
-LIB_SRC += $(wildcard lib/functions/linked_list/*.c)
-LIB_SRC += $(wildcard lib/printf/*.c)
-LIB_SRC += $(wildcard lib/printf/baby/*.c)
-LIB_SRC += $(wildcard lib/printf/handler/*.c)
-
-TEST_SRC := $(wildcard tests/*.c)
 
 BUILD_DIR := .build
 
 OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
-LIB_OBJ := $(LIB_SRC:%.c=$(BUILD_DIR)/%.o)
 
 CC := gcc
 
 CFLAGS += -Wall -Wextra
-CFLAGS += -iquote ./include
 CFLAGS += -Wno-unused-parameter -Wunused-result -fanalyzer
 CFLAGS += -Wp,-U_FORTIFY_SOURCE -Wcast-qual -Wduplicated-branches
 CFLAGS += -Wduplicated-cond -Wformat=2 -Wshadow
@@ -51,9 +37,9 @@ $(BUILD_DIR)/%.o: %.c
 	@ $(CC) $(CFLAGS) -o $@ -c $<
 	@ $(LOG_TIME) "$(C_GREEN) CC $(C_PURPLE) $(notdir $@) $(C_RESET)"
 
-$(NAME): $(LIB_OBJ) $(OBJ)
-	@ ar rc $(NAME) $(LIB_OBJ) $(OBJ)
-	@ $(LOG_TIME) "$(C_CYAN) AR $(C_PURPLE) $(notdir $@) $(C_RESET)"
+$(NAME): $(OBJ)
+	@ $(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+	@ $(LOG_TIME) "$(C_GREEN) CC $(C_PURPLE) $(notdir $@) $(C_RESET)"
 	@ $(LOG_TIME) "$(C_GREEN) OK  Compilation finished $(C_RESET)"
 
 clean:
@@ -70,13 +56,5 @@ re:	fclean all
 .NOTPARALLEL: debug
 debug: CFLAGS += $(DEBUG_FLAGS)
 debug: all
-
-test: debug
-	@ $(CC) -o $(TEST_NAME) $(TEST_SRC) -I include -L. -lhashtable
-	@ $(LOG_TIME) "$(C_GREEN) CC $(C_PURPLE) $(notdir $@) $(C_RESET)"
-	@ $(LOG_TIME) "$(C_GREEN) OK  Tests compilation finished $(C_RESET)"
-
-test_run: test
-	@ ./$(TEST_NAME)
 
 .PHONY: all clean fclean re
