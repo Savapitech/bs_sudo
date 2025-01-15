@@ -16,6 +16,7 @@
               gcc
               criterion
               valgrind
+              compiledb
             ];
           };
       });
